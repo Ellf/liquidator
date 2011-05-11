@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ http://wowprogramming.com/FrameXML/UI.xsd">
-	<Button name="LiquidatorFrame" parent="UIParent" enableMouse="true" movable="true" frameStrata="LOW">
+	<Button name="LiquidatorFrame" parent="UIParent" enableMouse="true" movable="true" frameStrata="LOW" >
 	<Size x="175" y="100" />
 	<Anchors>
 		<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="Minimap">
