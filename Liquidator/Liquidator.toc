@@ -1,0 +1,13 @@
+## Interface: 40100
+## Title: Liquidator
+## Author: Remirol
+## Version: r00
+## Description: Will give a total value of your bags and bank.
+## Notes: The addon will give a total value of your bags and bank based on vendor value and auctioneer data if available.
+
+## X-Author-Server: Mazrigos EU
+## X-Author-Faction: Horde
+## X-License: GNU General Public License version 3 (GPLv3)
+
+Liquidator.lua
+Liquidator.xml
