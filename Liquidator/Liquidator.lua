@@ -1,12 +1,10 @@
 -----------------------------------------------------------------------------------
 -- Liquidator.lua
 -----------------------------------------------------------------------------------
-
+Liquidator = {}
 -----------------------------------------------------------------------------------
 -- Set up some local variable to track time and values
 -----------------------------------------------------------------------------------
-local bag_value = 0
-local bank_value = 0
 local total_value_of_bags = 0
 local total_value_of_bank = 0
 local VendorTotal = 0
@@ -17,45 +15,55 @@ local Auc_value_of_bank = 0
 -----------------------------------------------------------------------------------
 -- OnLoad function
 -----------------------------------------------------------------------------------
-function Liquidator_OnLoad(frame)
+function Liquidator:OnLoad(frame)
 	frame:RegisterForClicks("RightButtonUp")
 	frame:RegisterForDrag("LeftButton")
 	frame:RegisterEvent("BANKFRAME_OPENED")
 	frame:RegisterEvent("BANKFRAME_CLOSED")
 	frame:RegisterEvent("BAG_UPDATE")
 	frame:RegisterEvent("LOOT_CLOSED")
-	Liquidator_AddBags()
+	boolIsBankOpen = false;
+	Liquidator:AddBags()
 end
 
 -----------------------------------------------------------------------------------
 -- Define the events needed for the addon
 -----------------------------------------------------------------------------------
-function Liquidator_OnEvent(frame, event, ...)
-	if event == "BANKFRAME_OPENED" or event == "BANKFRAME_CLOSED" then
-		--Player opened bank
-		--print("DEBUG: bank frame opened")
-		bank_value = 0
+function Liquidator:OnEvent(frame, event, ...)
+	if event == "BANKFRAME_OPENED" then --or event == "BANKFRAME_CLOSED" then
+		-- Player opened or closed bank
+		-- print("DEBUG: bank frame opened")
+		boolIsBankOpen = true;
 		total_value_of_bank = 0
 		Auc_value_of_bank = 0
-		Liquidator_AddBank()
+		Liquidator:AddBank()
+	else
+	if event == "BANKFRAME_CLOSED" then
+		boolIsBankOpen = false;
+		total_value_of_bank = 0
+		Auc_value_of_bank = 0
+		Liquidator:AddBank()
 	else
 	if event == "LOOT_CLOSED" or event == "BAG_UPDATE" then
-		bank_value = 0
-		bag_value = 0
+		-- Player looted an item or moved stuff around in his bank or bag
 		total_value_of_bags = 0
 		Auc_value_of_bags = 0
-		-- Auc_value_of_bank = 0
-		Liquidator_AddBags()
-		Liquidator_AddBank()
+				  
+		Liquidator:AddBags()
+		if boolIsBankOpen == true then
+			Auc_value_of_bank = 0
+			total_value_of_bank = 0
+			Liquidator:AddBank()
+		end
+	end
 	end
 	end
 end
 
-
 -----------------------------------------------------------------------------------
 -- This is defunct maybe used at some point in the future
 -----------------------------------------------------------------------------------
-function Liquidator_ReportValue()
+function Liquidator:ReportValue()
 	local msgformat = "%d seconds spent in combat with %d incoming damage. Average incoming DPS was %.2f"
 	local msg = string.format(msgformat, total_time, total_damage, average_dps)
 	if GetNumPartyMembers() > 0 then
@@ -70,14 +78,14 @@ end
 -- This works out the bank value
 -- Determine if the bank is open and calculate as required, otherwise make note.
 -----------------------------------------------------------------------------------
-function Liquidator_AddBank()
+function Liquidator:AddBank()
 
 local itemSellPrice = 0
 local itemID = 0
 local itemBagCount = 1
 local itemStackCount = 1
 
-total_value_of_bank = 0
+--total_value_of_bank = 0
 
 for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
    bagslots = GetContainerNumSlots(i)
@@ -89,6 +97,9 @@ for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
          --print("DEBUG: itemID = nil")
       else
          itemSellPrice = select(11, GetItemInfo(itemID))
+		 if itemSellPrice == nil then
+			itemSellPrice = 0
+		 end
 		 itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
          total_value_of_bank = total_value_of_bank + (itemSellPrice * itemBagCount)
       end
@@ -103,6 +114,9 @@ for bagslotscounter = 1, bagslots do
 		--print("DEBUG: itemID = nil")
 	else
 		itemSellPrice = select(11, GetItemInfo(itemID))
+		if (itemSellPrice == nil) then
+			itemSellPrice = 0
+		end
 		itemStackCount = select(2, GetContainerItemInfo(BANK_CONTAINER, bagslotscounter))
 		total_value_of_bank = total_value_of_bank + (itemSellPrice * itemStackCount)
 	end
@@ -113,31 +127,54 @@ end
 ----------------------------------------------------------------------------------
 if AucAdvanced then
 
-	bagslots = GetContainerNumSlots(BANK_CONTAINER) --default bank
-	Auc_value_of_bank = 0
-	for bagslotscounter = 1, bagslots do
-		itemID = GetContainerItemID(BANK_CONTAINER, bagslotscounter)
-		if (itemID == nil) then
-			--print("DEBUG: itemID = nil")
-		else
-			--itemSellPrice = select(11, GetItemInfo(itemID))
-			itemBagCount = select(2, GetContainerItemInfo(BANK_CONTAINER, bagslotscounter))
-			itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
-			Auc_value_of_bank = Auc_value_of_bank + (itemSellPrice * itemBagCount)
-		end
-	end
+bagslots = GetContainerNumSlots(BANK_CONTAINER) --default bank
+--Auc_value_of_bank = 0
 
+for bagslotscounter = 1, bagslots do
+	itemID = GetContainerItemID(BANK_CONTAINER, bagslotscounter)
+	if (itemID == nil) then
+		--print("DEBUG: itemID = nil")
+	else
+		--itemSellPrice = select(11, GetItemInfo(itemID))
+		itemBagCount = select(2, GetContainerItemInfo(BANK_CONTAINER, bagslotscounter))
+		itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+		if (itemSellPrice) == nil then
+			itemSellPrice = 0
+		end
+		Auc_value_of_bank = Auc_value_of_bank + (itemSellPrice * itemBagCount)
+	end
 end
 
-liquidator_printCash()
+for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
+   bagslots = GetContainerNumSlots(i)
+   
+   for bagslotscounter = 1, bagslots do
+      itemID = GetContainerItemID(i, bagslotscounter)
+      if (itemID == nil) then
+         --print("DEBUG: itemID = nil")
+      else
+         itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
+		 itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+		 if (itemSellPrice == nil) then
+			itemSellPrice = 0
+		end
+		 Auc_value_of_bank = Auc_value_of_bank + (itemSellPrice * itemBagCount)
+      end
+   end
+end
+	
+end
 
+Liquidator:printCash()
+
+-- end of Liquidator_AddBank() function
 end
 
 
 -----------------------------------------------------------------------------------
 -- Add the value of all your bags
 -----------------------------------------------------------------------------------
-function Liquidator_AddBags()
+function Liquidator:AddBags()
 
 local itemSellPrice = 0
 local itemID = 0
@@ -147,18 +184,21 @@ local itemStackCount = 1
 total_value_of_bags = 0
 
 for i = 0, NUM_BAG_SLOTS do
-   bagslots = GetContainerNumSlots(i)
-   for bagslotscounter = 1, bagslots do
-      itemID = GetContainerItemID(i, bagslotscounter)
+	bagslots = GetContainerNumSlots(i)
+		for bagslotscounter = 1, bagslots do
+		itemID = GetContainerItemID(i, bagslotscounter)
 
-      if (itemID == nil) then
-         --print("DEBUG: itemID = nil")
-      else
-         itemSellPrice = select(11, GetItemInfo(itemID))
-		 itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
-         total_value_of_bags = total_value_of_bags + (itemSellPrice * itemBagCount)
-      end
-   end
+			if (itemID == nil)  or (itemSellPrice == nill) then
+			--print("DEBUG: itemID = nil")
+			else
+			itemSellPrice = select(11, GetItemInfo(itemID))
+				if (itemSellPrice == nil) then
+				itemSellPrice = 0
+				end
+			itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
+			total_value_of_bags = total_value_of_bags + (itemSellPrice * itemBagCount)
+			end
+		end
 end
 
 if AucAdvanced then
@@ -169,12 +209,15 @@ for i = 0, 4 do
    bagslots = GetContainerNumSlots(i)
    for bagslotscounter = 1, bagslots do
       itemID = GetContainerItemID(i, bagslotscounter)
-      if (itemID == nil) then
+      if (itemID == nil) or (itemSellPrice == nil) then
          --print("DEBUG: itemID = nil")
       else
          --itemSellPrice = select(11, GetItemInfo(itemID))
 		 itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
          itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+		if (itemSellPrice == nil) then
+			itemSellPrice = 0
+		end
 		 Auc_value_of_bags = Auc_value_of_bags + (itemSellPrice * itemBagCount)
       end
    end
@@ -182,11 +225,11 @@ end
 
 end
 
-liquidator_printCash()
+Liquidator:printCash()
 
 end
 
-function liquidator_printCash()
+function Liquidator:printCash()
 
 	local VendorBags = "Vendor Bags:"
 	local VendorBagsSale = GetCoinTextureString(total_value_of_bags)

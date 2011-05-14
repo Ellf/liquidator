@@ -17,120 +17,124 @@
 			<AbsValue val="32" />
 		</EdgeSize>
 	</Backdrop>
+
 	<Layers>
-		<Layer level="OVERLAY">
-			<FontString name="$parentTitle" inherits="GameFontNormalSmall" justifyH="CENTER"  justifyV="TOP" setAllPoints="true" text="Liquidator - v0.1" >
-			<Anchors>
-				<Anchor point="TOP">
-					<Offset x="0" y="-10" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentVendorBags" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset x="10" y="-30" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentVendorBagsSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPRIGHT">
-					<Offset x="-10" y="-30" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentVendorBank" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset x="10" y="-40" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentVendorBankSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPRIGHT">
-					<Offset x="-10" y="-40" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentVendorTxtTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset x="10" y="-50" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentVendorTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPRIGHT">
-					<Offset x="-10" y="-50" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentAuctionBags" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset x="10" y="-60" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentAuctionBagsSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPRIGHT">
-					<Offset x="-10" y="-60" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentAuctionBank" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset x="10" y="-70" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentAuctionBankSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPRIGHT">
-					<Offset x="-10" y="-70" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentAuctionTxtTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset x="10" y="-80" />
-				</Anchor>
-			</Anchors>
-			</FontString>
-			
-			<FontString name="$parentAuctionTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
-			<Anchors>
-				<Anchor point="TOPRIGHT">
-					<Offset x="-10" y="-80" />
-				</Anchor>
-			</Anchors>
-			</FontString>			
-			
+		<Layer level="OVERLAY" >
+			<Texture name="$parentHorizontal">
+			<Color r="0.0" g="0.6" b="0.6" a="0.5"/>
+			</Texture>
+				<FontString name="$parentTitle" inherits="GameFontNormalSmall" justifyH="CENTER"  justifyV="TOP" setAllPoints="true" text="Liquidator - v0.1" >
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset x="0" y="-10" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentVendorBags" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="10" y="-30" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentVendorBagsSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-10" y="-30" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentVendorBank" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="10" y="-40" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentVendorBankSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-10" y="-40" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentVendorTxtTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="10" y="-50" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentVendorTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-10" y="-50" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentAuctionBags" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="10" y="-60" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentAuctionBagsSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-10" y="-60" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentAuctionBank" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="10" y="-70" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentAuctionBankSale" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-10" y="-70" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentAuctionTxtTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="10" y="-80" />
+					</Anchor>
+				</Anchors>
+				</FontString>
+				
+				<FontString name="$parentAuctionTotal" inherits="GameFontNormalSmall" justifyH="LEFT" setAllPoints="true" >
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-10" y="-80" />
+					</Anchor>
+				</Anchors>
+				</FontString>	
+
 		</Layer>
 	</Layers>
 	<Scripts>
 		<OnLoad>
-			Liquidator_OnLoad(self)
+			Liquidator:OnLoad(self)
 		</OnLoad>
 		<OnEvent>
-			Liquidator_OnEvent(self, event, ...)
+			Liquidator:OnEvent(self, event, ...)
 		</OnEvent>
 		<OnDragStart>
 			self:StartMoving()
