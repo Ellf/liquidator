@@ -1,4 +1,4 @@
-﻿LQcurrentDBVersion = 0.1
+﻿LQcurrentDBVersion = 0.11
 
 Liquidator.AuctioneerAddons = {
   ["auc-advanced"] = { name = "Auc-Advanced", func = "GetAucAdv", check = "Auc-Advanced" },

@@ -1,12 +1,12 @@
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- Liquidator.lua
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 Liquidator = LibStub("AceAddon-3.0"):NewAddon("Liquidator", "AceConsole-3.0", "AceEvent-3.0")
 LiquidatorFrame = {}
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- Set up some local variable
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 local total_value_of_bags = 0
 local total_value_of_bank = 0
 local VendorTotal = 0
@@ -17,14 +17,17 @@ local Auc_value_of_bank = 0
 _G["Liquidator"] = Liquidator
 Liquidator.version = GetAddOnMetadata("Liquidator", "Version")
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- OnInitialize function
 -- Added 17/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:OnInitialize()
-	-- Code that you want to run when the addon is firt loaded goes here
+	Liquidator.db = LibStub("AceDB-3.0"):New("LiquidatorDB", DATABASE_DEFAULTS, 'Default')
+	-- Code that you want to run when the addon is first loaded goes here
+	--Call clsdatabase this checks the databased version, and to see if there is data in the database
+	Liquidator:CheckMasterDatabase();
 	-- Set up some slash commands
-	--self:RegisterChatCommand("lr", "ChatCommand")
+	self:RegisterChatCommand("lr", "ChatCommand")
 	self:RegisterChatCommand("liquidator", "ChatCommand")
 end
 
@@ -32,13 +35,15 @@ function Liquidator:ChatCommand(input)
 	Liquidator:Print("Please use /lr to show options!")
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- OnEnable function
 -- Added 17/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:OnEnable()
 	LiquidatorFrame:Initialize()
 	--self:Print("Liquidator is running")
+	--Load Options Table from Ace3ConfigCore
+	Liquidator:LoadOptionsTables()
 	self:RegisterEvent("BANKFRAME_OPENED")
 	self:RegisterEvent("BANKFRAME_CLOSED")
 	self:RegisterEvent("BAG_UPDATE") 
@@ -47,21 +52,20 @@ function Liquidator:OnEnable()
 	Liquidator:AddBags()
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- Initialize the new LUA only frame
 -- 20 May for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function LiquidatorFrame:Initialize()
 	Liquidator:Print("Initialized. Version: " .. Liquidator.version)
-	Liquidator:LoadOptionsTables()
 	-- okay, lets start to create the frame
-	local frame = CreateFrame("Frame", nil, Minimap)
+	local frame = CreateFrame("Frame", nil, UIParent)
 	frame:EnableMouse(true)
 	frame:SetMovable(true)
 	frame:IsResizable(true)
-	frame:SetHeight(100)
-	frame:SetWidth(275)
-	frame:SetPoint("TOPRIGHT", Minimap, "BOTTOMRIGHT", -0, -30)
+	frame:SetHeight(Liquidator.db.profile.frameHeight)
+	frame:SetWidth(Liquidator.db.profile.frameWidth)
+	frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", Liquidator.db.profile.frameLeft, Liquidator.db.profile.frameTop)
 	
 	frame:SetBackdrop({
       bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
@@ -76,7 +80,7 @@ function LiquidatorFrame:Initialize()
 	title = frame:CreateFontString()
 	title:SetPoint('CENTER', frame, 'TOP', 0, -10)
 	title:SetFontObject(GameFontNormal)
-	title:SetText('Liquidator - ' .. Liquidator.version)
+	title:SetText('Liquidator - ' .. Liquidator.version .. ' |cffeda55f(Using: ' .. Liquidator.db.profile.selectedAuctionAddon .. ")|r")
 	LiquidatorFrame.title = title
 	
 	VendorBags = frame:CreateFontString()
@@ -150,30 +154,30 @@ function LiquidatorFrame:Initialize()
 	frame:SetScript("OnMouseUp",function(self, button)
 		if ( button == "LeftButton" ) then
 			self:StopMovingOrSizing()
-			--Liquidator:SaveFramePosition()
+			Liquidator:SaveFramePosition()
 		end
 	end)
 	
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- OnDisable function
 -- Added 17/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:OnDisable()
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- OnLoad function
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:OnLoad(frame)
 
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- PLAYER_ENTERING_WORLD event
 -- Added 19/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:PLAYER_ENTERING_WORLD()
 	-- This is where we'll try to create a frame using only lua code
 	-- 22 May for Ace3 conversion
@@ -185,10 +189,10 @@ function Liquidator:PLAYER_ENTERING_WORLD()
 
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- BANKFRAME_OPENED event
 -- Added 18/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:BANKFRAME_OPENED()
 	--self:RegisterEvent("BANKFRAME_OPENED")
 	--Liquidator:Print("Yahoo!, the bankframe is open")
@@ -199,10 +203,10 @@ function Liquidator:BANKFRAME_OPENED()
 		Liquidator:AddBank()
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- BANKFRAME_CLOSED event
 -- Added 18/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:BANKFRAME_CLOSED()
 	--self:RegisterEvent("BANKFRAME_CLOSED")
 	--Liquidator:Print("Yahoo!, the bankframe is closed")
@@ -213,10 +217,10 @@ function Liquidator:BANKFRAME_CLOSED()
 		Liquidator:AddBank()
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- BAG_UPDATE event
 -- Added 18/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:BAG_UPDATE()
 	--self:RegisterEvent("BAG_UPDATE")
 	--Liquidator:Print("Sweet, the bag_update code has run!")
@@ -233,13 +237,13 @@ function Liquidator:BAG_UPDATE()
 		end
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- LOOT_CLOSED event
 -- Added 18/05/2011 for Ace3 conversion
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:LOOT_CLOSED()
 	--self:RegisterEvent("LOOT_CLOSED")
-	--Liquidator:Print("Yahoo!, the Loot frame is closed is open")
+	--Liquidator:Print("Yahoo!, the Loot frame is closed")
 		-- Player looted an item or moved stuff around in his bank or bag
 		total_value_of_bags = 0
 		Auc_value_of_bags = 0
@@ -252,9 +256,9 @@ function Liquidator:LOOT_CLOSED()
 		end
 end
 
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 -- This is defunct maybe used at some point in the future
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:ReportValue()
 	local msgformat = "%d seconds spent in combat with %d incoming damage. Average incoming DPS was %.2f"
 	local msg = string.format(msgformat, total_time, total_damage, average_dps)
@@ -266,10 +270,12 @@ function Liquidator:ReportValue()
 end
 
 
------------------------------------------------------------------------------------
--- This works out the bank value
+-----------------------------------------------------------------------
+--                    =============
+-- This works out the == B A N K == value
+--                    =============
 -- Determine if the bank is open and calculate as required, otherwise make note.
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
 function Liquidator:AddBank()
 
 local itemSellPrice = 0
@@ -288,11 +294,12 @@ for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
       if (itemID == nil) then
          --print("DEBUG: itemID = nil")
       else
-         itemSellPrice = select(11, GetItemInfo(itemID))
+         -- itemSellPrice = simply the sell vendor price
+		 itemSellPrice = select(11, GetItemInfo(itemID))
 		 if itemSellPrice == nil then
 			itemSellPrice = 0
 		 end
-		 itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
+		 itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter)) -- this is the stack number
          total_value_of_bank = total_value_of_bank + (itemSellPrice * itemBagCount)
       end
    end
@@ -314,11 +321,9 @@ for bagslotscounter = 1, bagslots do
 	end
 end
 
-----------------------------------------------------------------------------------
--- If Actioneer is installed, calculate the value of items as per Appraiser value
-----------------------------------------------------------------------------------
-if AucAdvanced then
-
+-----------------------------------------------------------------------
+-- If Auction addons are installed, calculate the value of items
+-----------------------------------------------------------------------
 bagslots = GetContainerNumSlots(BANK_CONTAINER) --default bank
 --Auc_value_of_bank = 0
 
@@ -329,7 +334,11 @@ for bagslotscounter = 1, bagslots do
 	else
 		--itemSellPrice = select(11, GetItemInfo(itemID))
 		itemBagCount = select(2, GetContainerItemInfo(BANK_CONTAINER, bagslotscounter))
-		itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+		
+		if Liquidator.db.profile.selectedAuctionAddon == "Auc-Advanced" then itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+		elseif Liquidator.db.profile.selectedAuctionAddon == "Auctionator" then itemSellPrice = Atr_GetAuctionBuyout(itemID)
+		end
+		
 		if (itemSellPrice) == nil then
 			itemSellPrice = 0
 		end
@@ -346,8 +355,12 @@ for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
          --print("DEBUG: itemID = nil")
       else
          itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
-		 itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
-		 if (itemSellPrice == nil) then
+	  
+		if Liquidator.db.profile.selectedAuctionAddon == "Auc-Advanced" then itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+		elseif Liquidator.db.profile.selectedAuctionAddon == "Auctionator" then itemSellPrice = Atr_GetAuctionBuyout(itemID)
+		end
+		
+		if (itemSellPrice == nil) then
 			itemSellPrice = 0
 		end
 		 Auc_value_of_bank = Auc_value_of_bank + (itemSellPrice * itemBagCount)
@@ -355,17 +368,15 @@ for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
    end
 end
 	
-end
-
 Liquidator:printCash()
 
 -- end of Liquidator_AddBank() function
 end
 
 
------------------------------------------------------------------------------------
--- Add the value of all your bags
------------------------------------------------------------------------------------
+-----------------------------------------------------------------------
+-- Add the value of all your bags including auction addon values
+-----------------------------------------------------------------------
 function Liquidator:AddBags()
 
 local itemSellPrice = 0
@@ -384,17 +395,16 @@ for i = 0, NUM_BAG_SLOTS do
 			--print("DEBUG: itemID = nil")
 			else
 			itemSellPrice = select(11, GetItemInfo(itemID))
-				if (itemSellPrice == nil) then
-				itemSellPrice = 0
-				end
+			if (itemSellPrice == nil) then
+			itemSellPrice = 0
+			end
 			itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
 			total_value_of_bags = total_value_of_bags + (itemSellPrice * itemBagCount)
 			end
 		end
 end
 
-if AucAdvanced then
-
+-- Now calculate the value of your bags based on the auction addons
 Auc_value_of_bags = 0
 
 for i = 0, 4 do
@@ -402,11 +412,13 @@ for i = 0, 4 do
    for bagslotscounter = 1, bagslots do
       itemID = GetContainerItemID(i, bagslotscounter)
       if (itemID == nil) or (itemSellPrice == nil) then
-         --print("DEBUG: itemID = nil")
+         --print("DEBUG: itemID = nil") - ignore the nil value
       else
          --itemSellPrice = select(11, GetItemInfo(itemID))
 		 itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
-         itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+         if Liquidator.db.profile.selectedAuctionAddon == "Auc-Advanced" then itemSellPrice = AucAdvanced.GetModule("Util","Appraiser").GetPrice(itemID)
+		elseif Liquidator.db.profile.selectedAuctionAddon == "Auctionator" then itemSellPrice = Atr_GetAuctionBuyout(itemID)
+		end
 		if (itemSellPrice == nil) then
 			itemSellPrice = 0
 		end
@@ -415,14 +427,14 @@ for i = 0, 4 do
    end
 end
 
-end
-
 Liquidator:printCash()
 
 end
 
 function Liquidator:printCash()
 
+	local title = "Liquidator - " .. Liquidator.version .. " |cffeda55f(Using: " .. Liquidator.db.profile.selectedAuctionAddon .. ")|r"
+	
 	local VendorBags = "Vendor Bags:"
 	local VendorBagsSale = GetCoinTextureString(total_value_of_bags)
 	local VendorBank = "Vendor Bank:"
@@ -448,6 +460,7 @@ function Liquidator:printCash()
 
 	--Liquidator:Print(VendorBags .. " : " .. VendorBagsSale)
 	
+	LiquidatorFrame.title:SetText(title)
 	LiquidatorFrame.VendorBags:SetText(VendorBags)
 	LiquidatorFrame.VendorBagsSale:SetText(VendorBagsSale)
 	LiquidatorFrame.VendorBank:SetText(VendorBank)
@@ -467,5 +480,15 @@ function Liquidator:printCash()
 	LiquidatorFrame.AuctionTxtTotal:SetText(AuctionTxtTotal)
 	LiquidatorFrame.AuctionTotal:SetTextColor(0.5, 1, 0.5)
 	LiquidatorFrame.AuctionTotal:SetText(AuctionTotal)
+
+end
+
+function Liquidator:SaveFramePosition()
+
+frameLeft = floor(LiquidatorFrame.frame:GetLeft() +0.5)
+frameTop = floor(LiquidatorFrame.frame:GetTop() + 0.5)
+
+Liquidator:Print("frameLeft: " .. frameLeft .. ": frameTop: " .. frameTop)
+
 
 end

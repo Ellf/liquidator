@@ -1,21 +1,25 @@
-## Interface: 40100
+## Interface: 40300
 ## Title: Liquidator
 ## Author: Remirol
-## Version: r48
+## Version: r49
 ## Description: Will give a total value of your bags and bank.
 ## Notes: The addon will give a total value of your bags and bank based on vendor value and auctioneer data if available.
 ## Author: Remirol
+## X-Localizations: enGB
 
 ## X-Author-Server: Mazrigos EU
 ## X-Author-Faction: Horde
 ## X-License: GNU General Public License version 3 (GPLv3)
 ## X-Embeds: Ace3
 
-## X-Curse-Packaged-Version: v0.48
+## X-Curse-Packaged-Version: v0.49
 ## X-Curse-Project-Name: Liquidator
 ## X-Curse-Project-ID: liquidator
 ## X-Curse-Repository-ID: wow/liquidator/mainline
 
+## SavedVariables: LiquidatorDB
+
 embeds.xml
 LiquidatorCore.lua
+database.lua
 Ace3ConfigCore.lua

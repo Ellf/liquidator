@@ -1,0 +1,17 @@
+Liquidator Change Log
+
+5/MAR/2012 - r49
+	Finally got around to doing some major updates and getting ace3 library working with Liquidator. Some changes implemented with this version:
+
+	o Fully upgraded top use Ace3 libraries (still learning so there may be bugs or strange code here and there)
+	o Added options to set width and height of the frame
+	o Added options to set left and top locations (which should be saved between sessions)
+	o Option to change between auction addons (currently supported Auc-Advanced (auctioneer) and Auctionator)
+
+14/FEB/2012 - Aethyn (my son) was born :) - addon dedicated to him coz he's here sleeping making strange noises and keeping me from concentrating.
+
+If you have any suggestions or have bugs to report, please use Curse or Curseforge to submit a ticket (http://wow.curseforge.com/addons/liquidator/create-ticket/)
+
+Thanks for reading.
+
+Remirol

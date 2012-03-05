@@ -1,103 +1,118 @@
 ﻿selectedToonDelete = ""
-LWOptionsGeneral =
+LQOptionsGeneral =
 {
 	type = 'group',
 	name = "Liquidator",
 	cmdInline = false,
 	args = 
+	{
+		generalheaderDes = 
 		{
-			generalheaderDes = 
-			{
-				order = 1,
-				type = "description",
-				name = "You can edit the setting below to adjust how the Liquidator frame looks.",
-				cmdHidden = true,
-			},
-			headerDisplay = 
-			{
-				order = 2,
-				type = "header",
-				name = "Frame size and position",
-				cmdHidden = true,
-			},
-			frameWidth = 
-			{
-				type = 'range',
-				min = 150,
-				max = 500,
-				name = "Width:",
-				desc = "The width of the frame.",
-				order = 3,
-				
-				--width = "",
-			},
-			frameHeight = 
-			{
-				type = 'range',
-				min = 80,
-				max = 500,
-				name = "Height:",
-				desc = "The height of the frame.",
-				order = 4,
-				--width = "full",
-			},
-			locationDesc = 
-			{
-				type = 'description',
-				name = "These are the default location for launching Liquidator.",
-				order = 5,
-			},
-			frameLeft = 
-			{
-				type = 'input',
-				name = "Location: X",
-				desc = "The X coordinate of the Liquidator frame.",
-				order = 6,
-				--width = "full",
-			},
-			frameTop = 
-			{
-				type = "input",
-				name = "Location: Y",
-				desc = "The Y coordinate of the Liquidator frame.",
-				order = 7,
-			},
-			headerPriceOptions = 
-			{
-				order = 8,
-				type = "header",
-				name = "Other Shizzle",
-				cmdHidden = true,
-			},
+			order = 1,
+			type = "description",
+			name = "You can edit the setting below to adjust how the Liquidator frame looks.",
+			cmdHidden = true,
 		},
+		headerDisplay = 
+		{
+			order = 2,
+			type = "header",
+			name = "Frame size and position",
+			cmdHidden = true,
+		},
+		SizeDesc = 
+		{
+			order = 3,
+			type = 'description',
+			name = "The default width and height are (w:250, h:100)",
+
+		},
+		frameWidth = 
+		{
+			order = 4,
+			type = 'range',
+			min = 150,
+			max = 500,
+			step = 1,
+			name = "Width:",
+			desc = "The width of the frame.",
+			set = function (_, v)  Liquidator.db.profile.frameWidth = v end,
+			get = function (info) return Liquidator.db.profile.frameWidth end,
+		},
+		frameHeight = 
+		{
+			order = 5,
+			type = 'range',
+			min = 80,
+			max = 500,
+			step = 1,
+			name = "Height:",
+			desc = "The height of the frame.",
+			set = function (_, v)  Liquidator.db.profile.frameHeight = v end,
+			get = function (info) return 			Liquidator.db.profile.frameHeight end,
+		},
+		locationDesc = 
+		{
+			order = 6,
+			type = 'description',
+			name = "Default X = 10; default Y = 740 - from bottomleft of screen",
+
+		},
+		frameLeft = 
+		{
+			order = 7,
+			type = 'input',
+			name = "Location: X",
+			desc = "The X coordinate of the Liquidator frame.",
+			set = function (_, v) Liquidator.db.profile.frameLeft = v end,
+			get = function (info) return Liquidator.db.profile.frameLeft end,
+		},
+		frameTop = 
+		{
+			order = 8,
+			type = "input",
+			name = "Location: Y",
+			desc = "The Y coordinate of the Liquidator frame.",
+			set = function (_, v) Liquidator.db.profile.frameTop = v end,
+			get = function (info) return Liquidator.db.profile.frameTop end,
+		},
+		headerPriceOptions =
+		{
+		  order = 9,
+		  type = "header",
+		  name = "Auction Addon Settings",
+		  cmdHidden = true,
+		},
+		auctionheaderDes = 
+		{
+			order = 10,
+			type = "description",
+			name = "Choose which auction pricing addon you wish to pull data from. If you change the addon type, you should reopen your bank to recalculate.",
+			cmdHidden = true,
+		},
+		auctionselect =
+		{
+		  order = 11,
+		  type = "select",
+		  name = "Auction Addon List",
+		  desc = "Select Auction Pricing Addon.",
+		  values = function() 
+			return Liquidator:listLoadedAuctions() 
+			end,
+		  disabled = function()
+			_, noindex = Liquidator:listLoadedAuctions()
+			return noindex
+		  end,
+		  get = function() return Liquidator.db.profile.selectedAuctionAddon end,
+		  set = function(_, v) Liquidator.db.profile.selectedAuctionAddon = v
+		  Liquidator:AddBags() --> printCash()
+		  Liquidator:AddBank()
+		  end,
+		},
+	},
 }
 
-LWOptionsSkins ={
-	name = "Liquid-Wealth: ToolTip Skinning",
-	type = 'group',
-	desc = "Options for Skinning The ToolTip",
-	args = 
-		{
-			generalheader = 
-			{
-				order = 1,
-				type = "header",
-				name = "ToolTip Skinning Settings",
-				cmdHidden = true,
-			},
-			TicTacSkinning = 
-			{
-				type = 'toggle',
-				name = "Enable TicTac Skinning",
-				desc = "Enables the skinning of the tooltip using TicTac for Skinning. Note: If you want to clear the skin you have to disable this, and then Reload UI",
-				order = 2,
-				disabled = function() return not (_G.TipTac and _G.TipTac.AddModifiedTip) end,
-
-			},
-		},
-}
-
-LWOptionsDatabase ={
+LQOptionsDatabase ={
 	name = "Liquidator: Database",
 	type = 'group',
 	desc = "Settings to allow addon debugging",
@@ -110,90 +125,47 @@ LWOptionsDatabase ={
 				name = "Database Settings",
 				cmdHidden = true,
 			},
-			lwConfigVerbs = 
+			lqConfigVerbs = 
 			{
 				order = 2,
 				type = "description",
-				name = "Liquidator Version: "..GetAddOnMetadata("Liquidator", "Version").."\nLiquidator (Final) Database Version: \nLiquidator Database Version: ",
+				name = "Liquidator Version: "..GetAddOnMetadata("Liquidator", "Version").."\nLiquidator (Final) Database Version: " .. LQcurrentDBVersion .. "\nLiquidator Database Version: ",
 				fontSize = "medium",
 				cmdHidden = true,
 			},
-			resetDatabases = 
+			resetDatabases =
 			{
-				type = 'execute',
-				name = "Reset All Data",
-				desc = "This will clear all databases with in Liquid-Wealth. Use this if you are having database problems, or if you have old databases.",
-				order = 3,
-				func = function()
-					Liquidator:resetMasterDatabases()
-				end,
-			},
-			removeCharFromDB = 
-			{
-				order = 4, type = "select",
-				name = "Reset Selected Toon Data",
-				desc = "Select Toon To Remove From Database.",
-				set = function(_,v)
-					local tableList={}
-					for i,_ in pairs(Liquid_Wealth.db.realm.toon) do
-						table.insert(tableList,i)
-					end
-					Liquidator:removeToonFromDB(tableList[v])
-				end,
-				values = function() 
-					local tableList={}
-					for i,_ in pairs(Liquid_Wealth.db.realm.toon) do
-						local toonWIcon = Liquid_Wealth:BuildIcons(Liquid_Wealth.db.realm.toon[i].unitID).." ".."|c"..Liquid_Wealth:ClassColor(Liquid_Wealth.db.realm.toon[i].unitID)..i.."|r"
-						table.insert(tableList,toonWIcon)
-					end 
-					return tableList 
-				end,
+			  type = 'execute',
+			  name = "Reset All Data",
+			  desc = "This will clear all databases with in Liquidator. Use this if you are having database problems, or if you have old databases.",
+			  order = 3,
+			  func = function()
+				Liquidator:resetMasterDatabases()
+			  end,
 			},
 		},
 }
 
-CommandLineOptionsRTC = {
-	name = "Remote Toon Config",
-	type = "group",
-	args = {
-	confdesc = {
-			order = 1,
-			type = "description",
-			name = "Please change your setting below",
-			cmdHidden = true,
-		},
-    generalheader = {
-		 order = 2,
-		 type = "header",
-		 name = "Vender & Auction Addon Settings",
-		},
-	nulloption = {
-			order = 3,
-			type = "description",
-			name = " ",
-			cmdHidden = true,
-		},
-    RanTest = {
-			type = "execute",
-			name = "Ran Test",
-			order = 9,
-			desc = "Ran Text.",
-			func = function() 
-            serializedData = Liquidator:Serialize("NPS")
-            Liquidator:SendCommMessage("LMAC", serializedData , "WHISPER", "wildorebar") end,
-		},
-	}
-}
+function Liquidator:listLoadedAuctions()
+  local table = {}
+  local noIndex = true
+  table["--None--"] = "--None--"
+  for _, addon in pairs(Liquidator.AuctioneerAddons) do
+    local _, isloaded = IsAddOnLoaded(addon.name);
+    if (isloaded) then --Check To See If Addon InList Is Enabled
+      table[addon.name] = addon.name
+      noIndex = false
+    end
+  end
+  return table, noIndex
+end
 		
 function Liquidator:LoadOptionsTables()
 	local AceConfig=LibStub("AceConfig-3.0")
-	AceConfig:RegisterOptionsTable("Liquidator", LWOptionsGeneral, {"lr", "liquidator"})
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Liquidator Skin",LWOptionsSkins)
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Liquidator Database",LWOptionsDatabase)
+	AceConfig:RegisterOptionsTable("Liquidator", LQOptionsGeneral, { "lr", "liquidator" })
+	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Liquidator Database", LQOptionsDatabase)
 	
-	
-	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator","Liquidator")
-	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator Skin", "ToolTip Skinning","Liquidator")
+	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator", "Liquidator")
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator Database", "Database","Liquidator")
-	--LibStub("LibAboutPanel").new("Liquidator", "Liquidator")
+	LibStub("LibAboutPanel").new("Liquidator", "Liquidator")
 end
