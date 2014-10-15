@@ -167,5 +167,5 @@ function Liquidator:LoadOptionsTables()
 	
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator", "Liquidator")
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator Database", "Database","Liquidator")
-	--LibStub("LibAboutPanel").new("Liquidator", "Liquidator")
+	LibStub("LibAboutPanel").new("Liquidator", "Liquidator")
 end
