@@ -17,6 +17,7 @@
 ## X-Curse-Project-ID: liquidator
 ## X-Curse-Repository-ID: wow/liquidator/mainline
 
+## OptionalDeps: Ace3, LibAboutPanel
 ## SavedVariables: LiquidatorDB
 
 embeds.xml

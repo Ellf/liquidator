@@ -1,5 +1,8 @@
 Liquidator Change Log
 
+15/OCT/2014 - r60/r61
+        Updated toc file to work with wow 6.x.x. No other changes were made at this time. Still trying to figure out SmartGit for Mac.
+
 5/MAR/2012 - r49
 	Finally got around to doing some major updates and getting ace3 library working with Liquidator. Some changes implemented with this version:
 
