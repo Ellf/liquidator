@@ -1,7 +1,7 @@
 ## Interface: 60000
 ## Title: Liquidator
 ## Author: Remirol
-## Version: r60
+## Version: r63
 ## Description: Will give a total value of your bags and bank.
 ## Notes: The addon will give a total value of your bags and bank based on vendor value and auctioneer data if available.
 ## Author: Remirol
@@ -12,7 +12,7 @@
 ## X-License: GNU General Public License version 3 (GPLv3)
 ## X-Embeds: Ace3
 
-## X-Curse-Packaged-Version: v0.60
+## X-Curse-Packaged-Version: v0.63
 ## X-Curse-Project-Name: Liquidator
 ## X-Curse-Project-ID: liquidator
 ## X-Curse-Repository-ID: wow/liquidator/mainline
