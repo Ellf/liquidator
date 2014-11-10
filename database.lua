@@ -16,6 +16,9 @@ DATABASE_DEFAULTS = {
     frameHeight = 100,
     frameLeft = 10,
     frameTop = 740,
+    ExcludeBank = true;
+    ExcludeBags = true;
+    ExcludeTotals = true;
   },
 }
 

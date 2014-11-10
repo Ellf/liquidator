@@ -36,7 +36,10 @@ LQOptionsGeneral =
 			step = 1,
 			name = "Width:",
 			desc = "The width of the frame.",
-			set = function (_, v)  Liquidator.db.profile.frameWidth = v end,
+			set = function (_, v) 
+				Liquidator.db.profile.frameWidth = v 
+				LiquidatorFrame.frame:SetWidth(v) 
+			end,
 			get = function (info) return Liquidator.db.profile.frameWidth end,
 		},
 		frameHeight = 
@@ -48,8 +51,11 @@ LQOptionsGeneral =
 			step = 1,
 			name = "Height:",
 			desc = "The height of the frame.",
-			set = function (_, v)  Liquidator.db.profile.frameHeight = v end,
-			get = function (info) return 			Liquidator.db.profile.frameHeight end,
+			set = function (_, v)  
+				Liquidator.db.profile.frameHeight = v 
+				LiquidatorFrame.frame:SetHeight(v) 
+			end,
+			get = function (info) return Liquidator.db.profile.frameHeight end,
 		},
 		locationDesc = 
 		{
@@ -109,6 +115,70 @@ LQOptionsGeneral =
 		  Liquidator:AddBank()
 		  end,
 		},
+		bagExcludeHeader = 
+		{
+			order = 12,
+			type = "header",
+			name = "Exclusions",
+			cmdHidden = true,
+		},
+		bagExcludeDesc = 
+		{
+			order = 13,
+			type = "description",
+			name = "Exclude or include which bags you wish to appear in Liquidator.",
+			cmdHidden = true,
+		},
+		bagExcludeBags =
+		{
+			order = 14,
+			type = "toggle",
+			name = "Enable Bags",
+			desc = "Toggle on or off showing your bags in Liquidator.",
+			width = "full",
+			get = function() return Liquidator.db.profile.ExcludeBags end,
+			set = function(_, v) 
+				Liquidator.db.profile.ExcludeBags = v 
+				if Liquidator.db.profile.ExcludeBags then --TRUE
+					--Liquidator.db.profile.frameHeight = Liquidator.db.profile.frameHeight + (lineCount * lineHeight)
+					--LiquidatorFrame.frame:SetHeight(Liquidator.db.profile.frameHeight)
+					--Liquidator:Print("1: lineCount: " .. lineCount .. ": lineHeight: " .. lineHeight .. " : frameHeight: " .. Liquidator.db.profile.frameHeight)
+					lineCount = lineCount + 2
+				else
+					lineCount = lineCount - 2
+					--Liquidator.db.profile.frameHeight = Liquidator.db.profile.frameHeight - (lineCount * lineHeight)
+					--LiquidatorFrame.frame:SetHeight(Liquidator.db.profile.frameHeight)
+					--Liquidator:Print("2: lineCount: " .. lineCount .. ": lineHeight: " .. lineHeight .. " : frameHeight: " .. Liquidator.db.profile.frameHeight)
+				end
+				Liquidator:printCash()
+			end,
+		},
+		bagExcludeBank =
+		{
+			order = 15,
+			type = "toggle",
+			name = "Enable Bank",
+			desc = "Toggle on or off showing your bank in Liquidator.",
+			width = "full",
+			get = function() return Liquidator.db.profile.ExcludeBank end,
+			set = function(_, v) 
+				Liquidator.db.profile.ExcludeBank = v
+				Liquidator:printCash()
+			end,
+		},
+		bagExcludeTotals =
+		{
+			order = 16,
+			type = "toggle",
+			name = "Enable Totals",
+			desc = "Toggle on or off the total values (good to disable when not showing both bags and bank values)",
+			width = "full",
+			get = function() return Liquidator.db.profile.ExcludeTotals end,
+			set = function(_, v)
+				Liquidator.db.profile.ExcludeTotals = v
+				Liquidator:printCash()
+			end,
+		},
 	},
 }
 
@@ -167,5 +237,5 @@ function Liquidator:LoadOptionsTables()
 	
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator", "Liquidator")
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Liquidator Database", "Database","Liquidator")
-	--LibStub("LibAboutPanel").new("Liquidator", "Liquidator")
+	LibStub("LibAboutPanel").new("Liquidator", "Liquidator")
 end

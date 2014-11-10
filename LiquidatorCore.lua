@@ -1,8 +1,9 @@
 -----------------------------------------------------------------------
--- Liquidator.lua
+-- LiquidatorCore.lua
 -----------------------------------------------------------------------
 Liquidator = LibStub("AceAddon-3.0"):NewAddon("Liquidator", "AceConsole-3.0", "AceEvent-3.0")
-LiquidatorFrame = {}
+LiquidatorFrame = {} -- so this sets up a blank table for our functions
+tblMainPanel = {} --construct an empty table
 
 -----------------------------------------------------------------------
 -- Set up some local variable
@@ -13,6 +14,9 @@ local VendorTotal = 0
 local AuctionTotal = 0
 local Auc_value_of_bags = 0
 local Auc_value_of_bank = 0
+local bagname = ""
+lineHeight = 5
+lineCount = 6
 
 _G["Liquidator"] = Liquidator
 Liquidator.version = GetAddOnMetadata("Liquidator", "Version")
@@ -32,7 +36,7 @@ function Liquidator:OnInitialize()
 end
 
 function Liquidator:ChatCommand(input)
-	Liquidator:Print("Please use /lr to show options!")
+	Liquidator:Print("Currently not active - please press ESC and choose Interface -> addons -> Liquidator.")
 end
 
 -----------------------------------------------------------------------
@@ -47,7 +51,9 @@ function Liquidator:OnEnable()
 	self:RegisterEvent("BANKFRAME_OPENED")
 	self:RegisterEvent("BANKFRAME_CLOSED")
 	self:RegisterEvent("BAG_UPDATE") 
-	self:RegisterEvent("LOOT_CLOSED")	
+	self:RegisterEvent("LOOT_CLOSED")
+	self:RegisterEvent("GUILDBANKFRAME_OPENED") --not tested
+	self:RegisterEvent("GUILDBANKFRAME_CLOSED")
 	boolIsBankOpen = false;
 	Liquidator:AddBags()
 end
@@ -55,92 +61,109 @@ end
 -----------------------------------------------------------------------
 -- Initialize the new LUA only frame
 -- 20 May for Ace3 conversion
+--
+-- Here is the layout as of version 0.51
+--					Liquidator - v0.xx (using xxxxxxx)	| x = -10
+--			Vendor Bags:					GG SS CC	| x = -20
+--			Vendor Bank:					GG SS CC	| x = -32
+--			Total:							GG SS CC	| x = -44
+--			Auction Bags:					GG SS CC	| x = -56
+--			Auction Bank:					GG SS CC	| x = -68
+--			Total:							GG SS CC	| x = -80
 -----------------------------------------------------------------------
 function LiquidatorFrame:Initialize()
+	
+	local tenX = 10
+	local minustenX = -10
+	
+	-- This just prints to the default chat window that we are ready to go
 	Liquidator:Print("Initialized. Version: " .. Liquidator.version)
-	-- okay, lets start to create the frame
+	
+	Liquidator:TableofStuffs() --load word table
+	
+	-- okay, lets start to create the main frame
 	local frame = CreateFrame("Frame", nil, UIParent)
-	frame:EnableMouse(true)
-	frame:SetMovable(true)
-	frame:IsResizable(true)
-	frame:SetHeight(Liquidator.db.profile.frameHeight)
-	frame:SetWidth(Liquidator.db.profile.frameWidth)
-	frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", Liquidator.db.profile.frameLeft, Liquidator.db.profile.frameTop)
+	frame:EnableMouse(true) --self explanatory
+	frame:SetMovable(true)  --and again
+	frame:IsResizable(true) --not yet implemented
+	frame:SetHeight(Liquidator.db.profile.frameHeight) --we set height based on the profile db value
+	frame:SetWidth(Liquidator.db.profile.frameWidth)   --we set width based on the profile db value
+	frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", Liquidator.db.profile.frameLeft, Liquidator.db.profile.frameTop) --create the frame anchored at profile db values frameLeft,frameTop
 	
 	frame:SetBackdrop({
-      bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
+      bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],    --look for a better background
       edgeFile = [[Interface\Tooltips\UI-Tooltip-Border]],
       tile = true, tileSize = 16, edgeSize = 16,
       insets = {left = 5, right = 5, top = 5, bottom = 5}})
-	frame:SetBackdropColor(.3, .3, .3, .3)
+	frame:SetBackdropColor(.4, .4, .4, 1) --will be adding controls to change colours in future version
 	frame:SetBackdropBorderColor(1, 1, 1, 1)
 
-	LiquidatorFrame.frame = frame
+	LiquidatorFrame.frame = frame 
 	
 	title = frame:CreateFontString()
-	title:SetPoint('CENTER', frame, 'TOP', 0, -10)
+	title:SetPoint('CENTER', frame, 'TOP', tblMainPanel[2], tblMainPanel[3])
 	title:SetFontObject(GameFontNormal)
-	title:SetText('Liquidator - ' .. Liquidator.version .. ' |cffeda55f(Using: ' .. Liquidator.db.profile.selectedAuctionAddon .. ")|r")
+	title:SetText(tblMainPanel[1])
 	LiquidatorFrame.title = title
 	
 	VendorBags = frame:CreateFontString()
-	VendorBags:SetPoint('TOPLEFT', frame, 'TOPLEFT', 10, -20)
+	VendorBags:SetPoint('TOPLEFT', frame, 'TOPLEFT', tblMainPanel[5], tblMainPanel[6])
 	VendorBags:SetFontObject(GameFontNormal)
 	LiquidatorFrame.VendorBags = VendorBags
 	
 	VendorBagsSale = frame:CreateFontString()
-	VendorBagsSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -10, -20)
+	VendorBagsSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', minustenX, -20)
 	VendorBagsSale:SetFontObject(GameFontNormal)
 	LiquidatorFrame.VendorBagsSale = VendorBagsSale
 	
 	VendorBank = frame:CreateFontString()
-	VendorBank:SetPoint('TOPLEFT', frame, 'TOPLEFT', 10, -32)
+	VendorBank:SetPoint('TOPLEFT', frame, 'TOPLEFT', tenX, -32)
 	VendorBank:SetFontObject(GameFontNormal)
 	LiquidatorFrame.VendorBank = VendorBank
 	
 	VendorBankSale = frame:CreateFontString()
-	VendorBankSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -10, -32)
+	VendorBankSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', minustenX, -32)
 	VendorBankSale:SetFontObject(GameFontNormal)
 	LiquidatorFrame.VendorBankSale = VendorBankSale
 
 	VendorTxtTotal = frame:CreateFontString()
-	VendorTxtTotal:SetPoint('TOPLEFT', frame, 'TOPLEFT', 10, -44)
+	VendorTxtTotal:SetPoint('TOPLEFT', frame, 'TOPLEFT', tenX, -44)
 	VendorTxtTotal:SetFontObject(GameFontNormal)
 	LiquidatorFrame.VendorTxtTotal = VendorTxtTotal
 	
 	VendorTotal = frame:CreateFontString()
-	VendorTotal:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -10, -44)
+	VendorTotal:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', minustenX, -44)
 	VendorTotal:SetFontObject(GameFontNormal)
 	LiquidatorFrame.VendorTotal = VendorTotal
 	
-	-- Auctioneer Values
+	-- Auction Values
 	AuctionBags = frame:CreateFontString()
-	AuctionBags:SetPoint('TOPLEFT', frame, 'TOPLEFT', 10, -56)
+	AuctionBags:SetPoint('TOPLEFT', frame, 'TOPLEFT', tenX, -56)
 	AuctionBags:SetFontObject(GameFontNormal)
 	LiquidatorFrame.AuctionBags = AuctionBags
 	
 	AuctionBagsSale = frame:CreateFontString()
-	AuctionBagsSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -10, -56)
+	AuctionBagsSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', minustenX, -56)
 	AuctionBagsSale:SetFontObject(GameFontNormal)
 	LiquidatorFrame.AuctionBagsSale = AuctionBagsSale
 	
 	AuctionBank = frame:CreateFontString()
-	AuctionBank:SetPoint('TOPLEFT', frame, 'TOPLEFT', 10, -68)
+	AuctionBank:SetPoint('TOPLEFT', frame, 'TOPLEFT', tenX, -68)
 	AuctionBank:SetFontObject(GameFontNormal)
 	LiquidatorFrame.AuctionBank = AuctionBank
 	
 	AuctionBankSale = frame:CreateFontString()
-	AuctionBankSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -10, -68)
+	AuctionBankSale:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', minustenX, -68)
 	AuctionBankSale:SetFontObject(GameFontNormal)	
 	LiquidatorFrame.AuctionBankSale = AuctionBankSale
 	
 	AuctionTxtTotal = frame:CreateFontString()
-	AuctionTxtTotal:SetPoint('TOPLEFT', frame, 'TOPLEFT', 10, -80)
+	AuctionTxtTotal:SetPoint('TOPLEFT', frame, 'TOPLEFT', tenX, -80)
 	AuctionTxtTotal:SetFontObject(GameFontNormal)	
 	LiquidatorFrame.AuctionTxtTotal = AuctionTxtTotal
 	
 	AuctionTotal = frame:CreateFontString()
-	AuctionTotal:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -10, -80)
+	AuctionTotal:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', minustenX, -80)
 	AuctionTotal:SetFontObject(GameFontNormal)	
 	LiquidatorFrame.AuctionTotal = AuctionTotal
 	
@@ -175,6 +198,15 @@ function Liquidator:OnLoad(frame)
 end
 
 -----------------------------------------------------------------------
+-- Guild bank functions
+-----------------------------------------------------------------------
+function Liquidator:GUILDBANKFRAME_OPENED()
+end
+
+function Liquidator:GUILDBANKFRAME_CLOSED()
+end
+
+-----------------------------------------------------------------------
 -- PLAYER_ENTERING_WORLD event
 -- Added 19/05/2011 for Ace3 conversion
 -----------------------------------------------------------------------
@@ -183,7 +215,7 @@ function Liquidator:PLAYER_ENTERING_WORLD()
 	-- 22 May for Ace3 conversion
 	--LiquidatorFrame:Initialize()
 	
-	self:RegisterEvent("BAG_UPDATE")
+	self:RegisterEvent("BAG_UPDATE") --Fires many times (once for each slot in each container) during the login / UI load process. An addon which does extensive processing for this event should register it only after PLAYER_ENTERING_WORLD has fired if they are not interested in processing each event individually during the load process. *Shamelessly taken from clscore.lua (liquid wealth) as a reminder!!
 	--Liquidator:Print("DEBUG: woot, PLAYER_ENTERED_WORLD")
 	Liquidator:AddBags()
 
@@ -201,6 +233,7 @@ function Liquidator:BANKFRAME_OPENED()
 		total_value_of_bank = 0
 		Auc_value_of_bank = 0
 		Liquidator:AddBank()
+		Liquidator:AddBags()
 end
 
 -----------------------------------------------------------------------
@@ -224,13 +257,12 @@ end
 function Liquidator:BAG_UPDATE()
 	--self:RegisterEvent("BAG_UPDATE")
 	--Liquidator:Print("Sweet, the bag_update code has run!")
-		-- Player looted an item or moved stuff around in his bank or bag
+		--Player looted an item or moved stuff around in his bank or bag
 		--Liquidator:Print("BAG_UPDATE")
 		total_value_of_bags = 0
 		Auc_value_of_bags = 0
-				  
 		Liquidator:AddBags()
-		if boolIsBankOpen == true then
+		if boolIsBankOpen == true then --check to see if bankframe is open and if so...
 			Auc_value_of_bank = 0
 			total_value_of_bank = 0
 			Liquidator:AddBank()
@@ -249,7 +281,7 @@ function Liquidator:LOOT_CLOSED()
 		Auc_value_of_bags = 0
 				  
 		Liquidator:AddBags()
-		if boolIsBankOpen == true then
+		if boolIsBankOpen == true then --check to se if bankframe is open which can happen if you have Gobble. Time is money, friend.
 			Auc_value_of_bank = 0
 			total_value_of_bank = 0
 			Liquidator:AddBank()
@@ -318,6 +350,7 @@ for bagslotscounter = 1, bagslots do
 		end
 		itemStackCount = select(2, GetContainerItemInfo(BANK_CONTAINER, bagslotscounter))
 		total_value_of_bank = total_value_of_bank + (itemSellPrice * itemStackCount)
+		Liquidator.db.char.total_value_of_bank = total_value_of_bank
 	end
 end
 
@@ -361,9 +394,13 @@ for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
 		end
 		
 		if (itemSellPrice == nil) then
+		--Liquidator:Print(Auc_value_of_bank .. " : " .. Liquidator.db.char.Auc_value_of_bank)
 			itemSellPrice = 0
 		end
+		
 		 Auc_value_of_bank = Auc_value_of_bank + (itemSellPrice * itemBagCount)
+		 Liquidator.db.char.Auc_value_of_bank = Auc_value_of_bank
+		 --Liquidator:Print(Auc_value_of_bank .. " : " .. Liquidator.db.char.Auc_value_of_bank)
       end
    end
 end
@@ -375,7 +412,12 @@ end
 
 
 -----------------------------------------------------------------------
+--                    =============
+-- This works out the ==  B A G  == value
+--                    =============
 -- Add the value of all your bags including auction addon values
+-- Part One is the vendor value
+-- Part Two is the auction value
 -----------------------------------------------------------------------
 function Liquidator:AddBags()
 
@@ -384,6 +426,8 @@ local itemID = 0
 local itemBagCount = 1
 local itemStackCount = 1
 
+
+-- PART ONE vendor value --
 total_value_of_bags = 0
 
 for i = 0, NUM_BAG_SLOTS do
@@ -404,7 +448,7 @@ for i = 0, NUM_BAG_SLOTS do
 		end
 end
 
--- Now calculate the value of your bags based on the auction addons
+-- PART TWO auction value --
 Auc_value_of_bags = 0
 
 for i = 0, 4 do
@@ -412,7 +456,7 @@ for i = 0, 4 do
    for bagslotscounter = 1, bagslots do
       itemID = GetContainerItemID(i, bagslotscounter)
       if (itemID == nil) or (itemSellPrice == nil) then
-         --print("DEBUG: itemID = nil") - ignore the nil value
+         -- ignore the nil value
       else
          --itemSellPrice = select(11, GetItemInfo(itemID))
 		 itemBagCount = select(2, GetContainerItemInfo(i, bagslotscounter))
@@ -423,72 +467,181 @@ for i = 0, 4 do
 			itemSellPrice = 0
 		end
 		 Auc_value_of_bags = Auc_value_of_bags + (itemSellPrice * itemBagCount)
+		 Liquidator.db.char.Auc_value_of_bags = Auc_value_of_bags
       end
    end
 end
+
+--[[
+for i = 1, NUM_BAG_SLOTS do
+	local invID = ContainerIDToInventoryID(i)
+	bagLink = GetInventoryItemLink("player", invID);
+   --bagname = GetBagName(i)
+   --if bagname == nil then 
+	--bagname = "unknown" 
+   --end
+   Liquidator:Print("DEBUG: Bag " .. bagLink)
+end
+]]
 
 Liquidator:printCash()
 
 end
 
+
+----------------------------------------------------------------------------------------
+--
+--  This is the function that prints the information to the screen
+--  Returns: Nothing
+--
+----------------------------------------------------------------------------------------
 function Liquidator:printCash()
 
-	local title = "Liquidator - " .. Liquidator.version .. " |cffeda55f(Using: " .. Liquidator.db.profile.selectedAuctionAddon .. ")|r"
+	local title = tblMainPanel[1]  .. " |cffeda55f(Using: " .. Liquidator.db.profile.selectedAuctionAddon .. ")|r"
 	
-	local VendorBags = "Vendor Bags:"
+	local VendorBags = tblMainPanel[4]
 	local VendorBagsSale = GetCoinTextureString(total_value_of_bags)
 	local VendorBank = "Vendor Bank:"
-	if total_value_of_bank == 0 then 
+	--Liquidator:Print("DEBUG: db.char.total_value_of_b    vbb ank : " .. Liquidator.db.char.total_value_of_bank)
+	if (Liquidator.db.char.total_value_of_bank == 0) or Liquidator.db.char.total_value_of_bank == nil then 
 		VendorBankSale = "Visit Bank"
+		Liquidator.db.char.total_value_of_bank = 0
 	else
 		VendorBankSale = 0
-		VendorBankSale = GetCoinTextureString(total_value_of_bank) --<--
+		VendorBankSale = GetCoinTextureString(Liquidator.db.char.total_value_of_bank) --(total_value_of_bank) --<--
 	end
+	
 	local VendorTxtTotal = "Total:"
-	local VendorTotal = GetCoinTextureString(total_value_of_bags + total_value_of_bank)
+	local VendorTotal = GetCoinTextureString(total_value_of_bags + Liquidator.db.char.total_value_of_bank)
+	
 	local AuctionBags = "Auction Bags:"
-	local AuctionBagsSale = GetCoinTextureString(Auc_value_of_bags)
+	local AuctionBagsSale = GetCoinTextureString(Liquidator.db.char.Auc_value_of_bags) --(Auc_value_of_bags) using db value
 	local AuctionBank = "Auction Bank:"
-	if Auc_value_of_bank == 0 then
+	--Liquidator:Print("DEBUG: db.char.Auc_value_of_bank : " .. Liquidator.db.char.Auc_value_of_bank)
+	if (Liquidator.db.char.Auc_value_of_bank == 0) or Liquidator.db.char.Auc_value_of_bank == nil then
 		AuctionBankSale = "Visit Bank"
+		--Liquidator:Print(Liquidator.db.char.Auc_value_of_bank)
+		Liquidator.db.char.Auc_value_of_bank = 0
 	else
 		AuctionBankSale = 0
-		AuctionBankSale = GetCoinTextureString(Auc_value_of_bank)  --<--
+		AuctionBankSale = GetCoinTextureString(Liquidator.db.char.Auc_value_of_bank) --(Auc_value_of_bank)  --<--
 	end
+	
+	
 	local AuctionTxtTotal = "Total:"
-	local AuctionTotal = GetCoinTextureString(Auc_value_of_bags + Auc_value_of_bank)
+	local AuctionTotal = GetCoinTextureString(Liquidator.db.char.Auc_value_of_bags + Liquidator.db.char.Auc_value_of_bank)
 
 	--Liquidator:Print(VendorBags .. " : " .. VendorBagsSale)
 	
 	LiquidatorFrame.title:SetText(title)
-	LiquidatorFrame.VendorBags:SetText(VendorBags)
-	LiquidatorFrame.VendorBagsSale:SetText(VendorBagsSale)
-	LiquidatorFrame.VendorBank:SetText(VendorBank)
-	LiquidatorFrame.VendorBankSale:SetText(VendorBankSale)
-	LiquidatorFrame.VendorTxtTotal:SetTextColor(0.5, 1, 0.5)
-	LiquidatorFrame.VendorTxtTotal:SetText(VendorTxtTotal)
-	LiquidatorFrame.VendorTotal:SetTextColor(0.5, 1, 0.5)
-	LiquidatorFrame.VendorTotal:SetText(VendorTotal)
+	
+	if Liquidator.db.profile.ExcludeBags then --option Enable Bags is enabled
+		LiquidatorFrame.VendorBags:SetText(VendorBags)
+		LiquidatorFrame.VendorBagsSale:SetText(VendorBagsSale)
+		else
+		LiquidatorFrame.VendorBags:SetText("")
+		LiquidatorFrame.VendorBagsSale:SetText("")
+		VendorTotal = GetCoinTextureString(Liquidator.db.char.total_value_of_bank)
+		AuctionTotal = GetCoinTextureString(Liquidator.db.char.Auc_value_of_bank)
+	end
+	
+	if Liquidator.db.profile.ExcludeBank then
+		LiquidatorFrame.VendorBank:SetText(VendorBank)
+		LiquidatorFrame.VendorBankSale:SetText(VendorBankSale)
+		else
+		LiquidatorFrame.VendorBank:SetText("")
+		LiquidatorFrame.VendorBankSale:SetText("")
+		VendorTotal = GetCoinTextureString(total_value_of_bags)
+		AuctionTotal = GetCoinTextureString(Liquidator.db.char.Auc_value_of_bags)
+	end
+	
+	if Liquidator.db.profile.ExcludeTotals then
+		LiquidatorFrame.VendorTxtTotal:SetTextColor(0.5, 1, 0.5)
+		LiquidatorFrame.VendorTxtTotal:SetText(VendorTxtTotal)
+		LiquidatorFrame.VendorTotal:SetTextColor(0.5, 1, 0.5)
+		LiquidatorFrame.VendorTotal:SetText(VendorTotal)
+		else
+		LiquidatorFrame.VendorTxtTotal:SetText("")
+		LiquidatorFrame.VendorTotal:SetText("")
+	end
+	
 	-- Auctioneer Values
 	LiquidatorFrame.AuctionBags:SetTextColor(0.5, 0.5, 1)
-	LiquidatorFrame.AuctionBags:SetText(AuctionBags)
-	LiquidatorFrame.AuctionBagsSale:SetText(AuctionBagsSale)
-	LiquidatorFrame.AuctionBank:SetTextColor(0.5, 0.5, 1)
-	LiquidatorFrame.AuctionBank:SetText(AuctionBank)
-	LiquidatorFrame.AuctionBankSale:SetText(AuctionBankSale)
-	LiquidatorFrame.AuctionTxtTotal:SetTextColor(0.5, 1, 0.5)
-	LiquidatorFrame.AuctionTxtTotal:SetText(AuctionTxtTotal)
-	LiquidatorFrame.AuctionTotal:SetTextColor(0.5, 1, 0.5)
-	LiquidatorFrame.AuctionTotal:SetText(AuctionTotal)
+	if Liquidator.db.profile.ExcludeBags then
+		LiquidatorFrame.AuctionBags:SetText(AuctionBags)
+		LiquidatorFrame.AuctionBagsSale:SetText(AuctionBagsSale)
+		else
+		LiquidatorFrame.AuctionBags:SetText("")
+		LiquidatorFrame.AuctionBagsSale:SetText("")
+	end
+	if Liquidator.db.profile.ExcludeBank then
+		LiquidatorFrame.AuctionBank:SetTextColor(0.5, 0.5, 1)
+		LiquidatorFrame.AuctionBank:SetText(AuctionBank)
+		LiquidatorFrame.AuctionBankSale:SetText(AuctionBankSale)
+		else
+		LiquidatorFrame.AuctionBank:SetText("")
+		LiquidatorFrame.AuctionBankSale:SetText("")
+	end
 
+	if Liquidator.db.profile.ExcludeTotals then
+		LiquidatorFrame.AuctionTxtTotal:SetTextColor(0.5, 1, 0.5)
+		LiquidatorFrame.AuctionTxtTotal:SetText(AuctionTxtTotal)
+		LiquidatorFrame.AuctionTotal:SetTextColor(0.5, 1, 0.5)
+		LiquidatorFrame.AuctionTotal:SetText(AuctionTotal)
+		else
+		LiquidatorFrame.AuctionTxtTotal:SetText("")
+		LiquidatorFrame.AuctionTotal:SetText("")
+	end
 end
 
+
+----------------------------------------------------------------------------------------
+--
+--  This is the function that saves the frame position to the db after it's been moved
+--  Also prints out a debug note (to be removed)
+--  Returns: Nothing
+--
+----------------------------------------------------------------------------------------
 function Liquidator:SaveFramePosition()
-
 frameLeft = floor(LiquidatorFrame.frame:GetLeft() +0.5)
+Liquidator.db.profile.frameLeft = floor(LiquidatorFrame.frame:GetLeft() +0.5)
 frameTop = floor(LiquidatorFrame.frame:GetTop() + 0.5)
+Liquidator.db.profile.frameTop = floor(LiquidatorFrame.frame:GetTop() + 0.5)
 
-Liquidator:Print("frameLeft: " .. frameLeft .. ": frameTop: " .. frameTop)
+--Liquidator:Print("frameLeft: " .. frameLeft .. ": frameTop: " .. frameTop)
 
+--Liquidator:Print(tblMainPanel[1])
+end
+
+---------------------------------------------------------------------------------------
+--
+--  Experimental function to use tables/arrays to store the text and values
+--  Returns: No sure yet
+--
+---------------------------------------------------------------------------------------
+--			Liquidator - v0.xx (using xxxxxxx)	| x = -10
+--			Vendor Bags:					GG SS CC	| x = -20
+--			Vendor Bank:					GG SS CC	| x = -32
+--			Total:							GG SS CC	| x = -44
+--			Auction Bags:					GG SS CC	| x = -56
+--			Auction Bank:					GG SS CC	| x = -68
+--			Total:							GG SS CC	| x = -80
+
+function Liquidator:TableofStuffs()
+
+	local tMP = tblMainPanel
+	local tinsert = table.insert
+	
+	tinsert(tMP, "Liquidator - " .. Liquidator.version)   -- .. "|cffeda55f(Using: " .. Liquidator.db.profile.selectedAuctionAddon .. ")|r")
+	tinsert(tMP, 0)
+	tinsert(tMP, -10)
+	tinsert(tMP, "Vendor Bags: ")
+	tinsert(tMP, 10)
+	tinsert(tMP, -20)
+	--tinsert(tMP, "GG SS CC:", xloc, yloc)
+	--tinsert(tMP, "Vendor Bank: ", xloc, yloc)
+	--tinsert(tMP, "Total: ", xloc, yloc)
+
+    tblWordstable = tMP
 
 end
