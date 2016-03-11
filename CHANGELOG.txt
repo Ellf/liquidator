@@ -1,5 +1,8 @@
 Liquidator Change Log
 
+11/MAR/2016 - r66
+        Updated toc file to work with wow 6.2.x
+
 15/OCT/2014 - r60/r61
         Updated toc file to work with wow 6.x.x. No other changes were made at this time. Still trying to figure out SmartGit for Mac.
 
